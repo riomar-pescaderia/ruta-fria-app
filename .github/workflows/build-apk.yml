@@ -28,12 +28,17 @@ jobs:
       - name: Compilar la app (debug)
         run: ./gradlew assembleDebug --no-daemon
 
+      # Queda descargable desde la pestaña "Actions" de este repositorio,
+      # dentro de la ejecución correspondiente, sección "Artifacts".
       - name: Guardar el APK como artefacto de esta ejecución
         uses: actions/upload-artifact@v4
         with:
           name: ruta-fria-app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
 
+      # Además, deja siempre un único link fijo con la última versión
+      # compilada — más simple de encontrar que entrar a "Actions" cada
+      # vez: Releases → "app-latest", en la página principal del repo.
       - name: Publicar como "última versión" (Releases)
         uses: softprops/action-gh-release@v2
         with:
@@ -41,3 +46,4 @@ jobs:
           name: Última versión de la app
           body: Se compila sola con cada cambio subido a la rama main. Descargá "app-debug.apk" de acá abajo e instalalo en el celular.
           files: app/build/outputs/apk/debug/app-debug.apk
+
