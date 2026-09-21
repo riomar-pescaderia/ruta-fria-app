@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "000000000000",
-    "project_id": "ruta-fria-app-placeholder",
-    "storage_bucket": "ruta-fria-app-placeholder.appspot.com"
+    "project_number": "593891829115",
+    "project_id": "ruta-fria-app",
+    "storage_bucket": "ruta-fria-app.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "mobilesdk_app_id": "1:593891829115:android:ab5a3995798c83980089de",
         "android_client_info": {
           "package_name": "com.riomarpescaderia.rutafriaapp"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "PLACEHOLDER_REEMPLAZAR_CON_TU_ARCHIVO_REAL"
+          "current_key": "AIzaSyAwGe_taItGlgA_AkfW35KeJaPc3oV47mw"
         }
       ],
       "services": {
