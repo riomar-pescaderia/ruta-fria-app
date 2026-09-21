@@ -47,6 +47,8 @@
                 android:hint="@string/hint_usuario"
                 android:inputType="text"
                 android:padding="14dp"
+                android:textColor="@color/ink"
+                android:textColorHint="@color/ink_soft"
                 android:background="@android:drawable/edit_text" />
 
             <EditText
@@ -58,6 +60,8 @@
                 android:hint="@string/hint_password"
                 android:inputType="textPassword"
                 android:padding="14dp"
+                android:textColor="@color/ink"
+                android:textColorHint="@color/ink_soft"
                 android:background="@android:drawable/edit_text" />
 
             <com.google.android.material.button.MaterialButton

@@ -16,7 +16,25 @@ android {
         versionName = "1.0"
     }
 
+    // Firma fija para las compilaciones debug: sin esto, cada máquina de
+    // GitHub Actions genera una llave de firma distinta en cada build, y
+    // Android rechaza instalar una app nueva sobre una firmada con otra
+    // llave ("conflicto con un paquete"). Usando siempre este mismo
+    // archivo, un vendedor puede instalar la última versión sobre la
+    // anterior sin desinstalar primero.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
