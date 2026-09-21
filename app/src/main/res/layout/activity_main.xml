@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="28dp"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:id="@+id/textoTitulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="@string/titulo_login"
+            android:textColor="@color/navy"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <!-- Grupo de login -->
+        <LinearLayout
+            android:id="@+id/grupoLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="20dp"
+                android:text="@string/subtitulo_login"
+                android:textColor="@color/ink_soft"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/campoUsuario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="username"
+                android:hint="@string/hint_usuario"
+                android:inputType="text"
+                android:padding="14dp"
+                android:background="@android:drawable/edit_text" />
+
+            <EditText
+                android:id="@+id/campoPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:autofillHints="password"
+                android:hint="@string/hint_password"
+                android:inputType="textPassword"
+                android:padding="14dp"
+                android:background="@android:drawable/edit_text" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/botonIngresar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/orange"
+                android:text="@string/boton_ingresar"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/textoErrorLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:textColor="#B3261E"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <!-- Grupo mostrado una vez logueado -->
+        <LinearLayout
+            android:id="@+id/grupoSesion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/textoSaludo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/ink"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textoEstado"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/sesion_lista"
+                android:textColor="@color/ink_soft" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/botonPermisoUbicacion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/orange"
+                android:text="@string/permiso_ubicacion_boton"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/botonPermisoNotificaciones"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@color/orange"
+                android:text="@string/permiso_notificaciones_boton"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/botonCerrarSesion"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/boton_cerrar_sesion" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

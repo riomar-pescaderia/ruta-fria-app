@@ -1,0 +1,13 @@
+<resources>
+    <!-- Misma paleta que ya usa Ruta Fría en la web (public/css/style.css) -->
+    <color name="navy">#1A2C4B</color>
+    <color name="navy_deep">#101D33</color>
+    <color name="blue">#46A3DB</color>
+    <color name="orange">#F6A30B</color>
+    <color name="orange_deep">#D88A05</color>
+    <color name="bg">#F3F5F8</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="ink">#16232F</color>
+    <color name="ink_soft">#5D6B78</color>
+    <color name="white">#FFFFFF</color>
+</resources>
