@@ -82,15 +82,23 @@ habilitarlo una vez por celular:
 
 - El vendedor no tiene que dejar la app abierta — alcanza con que esté
   instalada, con la sesión iniciada y los permisos dados. Puede usar el
-  celular con normalidad.
-- Sí importa que **no la cierre del todo** deslizándola fuera de la
-  lista de apps recientes — eso la saca del todo de la memoria y Android
-  no la despierta para la notificación hasta que se abra de nuevo a mano.
+  celular con normalidad, y **no pasa nada si la cierra deslizándola
+  fuera de la lista de apps recientes**: eso no la apaga a nivel del
+  sistema. La notificación de "localizar ahora" la despierta igual,
+  exactamente como le llegan los mensajes a WhatsApp aunque la hayas
+  cerrado así.
+- Lo único que sí corta esto de verdad es ir a Ajustes del celular →
+  Apps → Ruta Fría → **"Forzar detención"** — ese botón (distinto de
+  cerrarla normalmente) le dice a Android que no la despierte para nada
+  hasta que se abra de nuevo a mano.
 - En algunas marcas de celular con "ahorro de batería" agresivo (Xiaomi,
   Huawei y similares — Samsung y los Android "puros" en general no dan
-  problema) puede hacer falta, una vez, desactivar la optimización de
-  batería para esta app específica, desde Ajustes del celular, para que
-  las notificaciones lleguen siempre.
+  problema) el sistema puede tratar el "deslizar para cerrar" como si
+  fuera forzar la detención, salvo que el vendedor la haya marcado como
+  app permitida en segundo plano. Para esos casos puede hacer falta,
+  una vez, desactivar la optimización de batería para esta app
+  específica desde Ajustes del celular, para que las notificaciones
+  lleguen siempre.
 
 ## Estructura del proyecto
 

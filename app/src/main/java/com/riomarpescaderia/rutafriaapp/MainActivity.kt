@@ -1,6 +1,7 @@
 package com.riomarpescaderia.rutafriaapp
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -65,6 +66,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         botonCerrarSesion.setOnClickListener {
+            detenerSeguimiento()
             Prefs.cerrarSesion(this)
             mostrarPantallaLogin()
         }
@@ -160,7 +162,27 @@ class MainActivity : AppCompatActivity() {
 
         if (!faltaUbicacion && !faltaNotificaciones) {
             registrarTokenFcmSiCorresponde()
+            iniciarSeguimiento()
         }
+    }
+
+    // Prende TrackingService (seguimiento automático en horario laboral).
+    // Se llama después del login y cada vez que se confirma que ya están
+    // los permisos — si ya estaba corriendo, TrackingService lo detecta
+    // solo y no arranca un ciclo duplicado (ver corriendo en esa clase).
+    private fun iniciarSeguimiento() {
+        val servicio = Intent(this, TrackingService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(servicio)
+        } else {
+            startService(servicio)
+        }
+    }
+
+    // Corta el seguimiento automático al cerrar sesión — si no, quedaría
+    // mandando ubicación de un vendedor que ya no está logueado.
+    private fun detenerSeguimiento() {
+        stopService(Intent(this, TrackingService::class.java))
     }
 
     // Le avisa al servidor cuál es el token de Firebase de este celular,

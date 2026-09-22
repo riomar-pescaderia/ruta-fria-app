@@ -66,4 +66,13 @@ object ApiClient {
             .put("precision", precision.toDouble())
         return llamar("/api/app/ubicacion", "POST", cuerpo, token)
     }
+
+    // Entre qué horas (minutos desde la medianoche, hora de Argentina) la
+    // app tiene permitido mandar ubicación sola — lo define un
+    // administrador desde Ruta Fría (/vendedores/ubicacion/horario). Lo
+    // consulta TrackingService cada vez que arranca, para no quedarse
+    // con un horario viejo si lo cambiaron.
+    fun obtenerConfig(token: String): Respuesta {
+        return llamar("/api/app/config", "GET", null, token)
+    }
 }

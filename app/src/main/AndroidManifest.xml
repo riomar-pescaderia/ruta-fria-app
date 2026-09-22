@@ -8,6 +8,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <!-- Para que TrackingService pueda volver a prenderse solo después de
+         que se reinicia el celular (ver BootReceiver.kt). -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="false"
@@ -48,6 +51,24 @@
             android:name=".LocationService"
             android:exported="false"
             android:foregroundServiceType="location" />
+
+        <!-- Seguimiento automático en horario laboral (ver
+             TrackingService.kt) — queda corriendo en primer plano con su
+             propia notificación mientras dure la sesión. -->
+        <service
+            android:name=".TrackingService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
+        <!-- Vuelve a prender el seguimiento después de un reinicio del
+             celular, si correspondía que estuviera corriendo. -->
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 
