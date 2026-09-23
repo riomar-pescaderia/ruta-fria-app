@@ -11,6 +11,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.NotificationCompat
+import org.json.JSONArray
 import java.util.Calendar
 import java.util.TimeZone
 import kotlin.concurrent.thread
@@ -19,7 +20,8 @@ import kotlin.concurrent.thread
 // LocationService (una sola posición, a pedido), este servicio se prende
 // una vez — al loguearse, al abrir la app, o al reiniciarse el celular
 // (ver BootReceiver) — y desde ahí se queda corriendo solo, revisando
-// cada 5 minutos si está dentro del horario configurado desde Ruta Fría
+// cada tantos minutos (configurable desde Ruta Fría, ver
+// Prefs.intervaloMin) si está dentro del horario configurado
 // (/vendedores/ubicacion/horario): si lo está, manda la posición; si no,
 // no hace nada hasta el próximo control. No usa alarmas del sistema ni
 // permisos extra — mientras el servicio esté vivo y en primer plano,
@@ -30,7 +32,6 @@ class TrackingService : Service() {
     companion object {
         private const val CANAL_ID = "seguimiento"
         private const val NOTIF_ID = 502
-        private const val INTERVALO_MS = 5 * 60 * 1000L
         private val ZONA_AR = TimeZone.getTimeZone("America/Argentina/Buenos_Aires")
 
         @Volatile private var corriendo = false
@@ -70,9 +71,14 @@ class TrackingService : Service() {
             try {
                 val respuesta = ApiClient.obtenerConfig(token)
                 if (respuesta.exitosa) {
-                    val inicio = respuesta.cuerpo.optInt("tracking_hora_inicio_min", 480)
-                    val fin = respuesta.cuerpo.optInt("tracking_hora_fin_min", 1140)
-                    Prefs.guardarHorarioTracking(this, inicio, fin)
+                    val horarios = respuesta.cuerpo.optJSONArray("horarios")
+                    if (horarios != null) {
+                        Prefs.guardarHorarios(this, horarios.toString())
+                    }
+                    val intervaloMin = respuesta.cuerpo.optInt("tracking_intervalo_min", -1)
+                    if (intervaloMin > 0) {
+                        Prefs.guardarIntervaloMin(this, intervaloMin)
+                    }
                 }
             } catch (e: Exception) {
                 // Sin conexión justo al arrancar — se sigue con el último
@@ -102,15 +108,39 @@ class TrackingService : Service() {
         proximoTick?.let { manejador.removeCallbacks(it) }
         val tarea = Runnable { tick() }
         proximoTick = tarea
-        manejador.postDelayed(tarea, INTERVALO_MS)
+        val intervaloMs = Prefs.intervaloMin(this).coerceIn(1, 60) * 60 * 1000L
+        manejador.postDelayed(tarea, intervaloMs)
     }
 
+    // Recorre las franjas del día de hoy (puede haber más de una — por
+    // ejemplo 9 a 13 y 17 a 22) y devuelve true si la hora actual cae
+    // adentro de alguna. Calendar.DAY_OF_WEEK va de DOMINGO=1 a SÁBADO=7;
+    // se le resta 1 para que coincida con la convención del servidor
+    // (0=domingo … 6=sábado, la misma que extract(dow from ...) de Postgres).
     private fun enHorarioLaboral(): Boolean {
         val ahora = Calendar.getInstance(ZONA_AR)
+        val diaSemana = ahora.get(Calendar.DAY_OF_WEEK) - 1
         val minutosDelDia = ahora.get(Calendar.HOUR_OF_DAY) * 60 + ahora.get(Calendar.MINUTE)
-        val inicio = Prefs.horaInicioTrackingMin(this)
-        val fin = Prefs.horaFinTrackingMin(this)
-        return minutosDelDia in inicio until fin
+        return try {
+            val horarios = JSONArray(Prefs.horariosJson(this))
+            var enFranja = false
+            for (i in 0 until horarios.length()) {
+                val franja = horarios.getJSONObject(i)
+                if (franja.optInt("dia_semana", -1) != diaSemana) continue
+                val inicio = franja.optInt("hora_inicio_min", 0)
+                val fin = franja.optInt("hora_fin_min", 0)
+                if (minutosDelDia in inicio until fin) {
+                    enFranja = true
+                    break
+                }
+            }
+            enFranja
+        } catch (e: Exception) {
+            // JSON corrupto o inesperado (no debería pasar) — mejor no
+            // mandar ubicación de más que arriesgarse a mandarla de menos
+            // por un horario mal interpretado.
+            false
+        }
     }
 
     private fun detener() {
