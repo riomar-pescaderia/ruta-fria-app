@@ -34,11 +34,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textoSaludo: TextView
     private lateinit var textoEstado: TextView
     private lateinit var botonPermisoUbicacion: Button
+    private lateinit var botonPermisoUbicacionFondo: Button
     private lateinit var botonPermisoNotificaciones: Button
     private lateinit var botonPermisoBateria: Button
     private lateinit var botonCerrarSesion: Button
 
     private val pedirUbicacion = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+        actualizarEstadoPermisos()
+    }
+    private val pedirUbicacionFondo = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
         actualizarEstadoPermisos()
     }
     private val pedirNotificaciones = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -58,6 +62,7 @@ class MainActivity : AppCompatActivity() {
         textoSaludo = findViewById(R.id.textoSaludo)
         textoEstado = findViewById(R.id.textoEstado)
         botonPermisoUbicacion = findViewById(R.id.botonPermisoUbicacion)
+        botonPermisoUbicacionFondo = findViewById(R.id.botonPermisoUbicacionFondo)
         botonPermisoNotificaciones = findViewById(R.id.botonPermisoNotificaciones)
         botonPermisoBateria = findViewById(R.id.botonPermisoBateria)
         botonCerrarSesion = findViewById(R.id.botonCerrarSesion)
@@ -65,6 +70,11 @@ class MainActivity : AppCompatActivity() {
         botonIngresar.setOnClickListener { intentarLogin() }
         botonPermisoUbicacion.setOnClickListener {
             pedirUbicacion.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+        botonPermisoUbicacionFondo.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                pedirUbicacionFondo.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            }
         }
         botonPermisoNotificaciones.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -149,6 +159,21 @@ class MainActivity : AppCompatActivity() {
     private fun tienePermisoUbicacion(): Boolean =
         ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
+    // Android solo empezó a diferenciar "ubicación mientras se usa la
+    // app" de "ubicación todo el tiempo" a partir de Android 10 (API 29)
+    // — antes de eso, el permiso de ubicación normal ya alcanzaba siempre,
+    // así que en versiones viejas se considera concedido de por sí.
+    // Sin este permiso, un foreground service de tipo "location" no se
+    // puede CREAR mientras la app está en segundo plano — que es
+    // exactamente el caso de "Localizar ahora" llegando por Firebase con
+    // la app minimizada: intentarlo tira una SecurityException que cierra
+    // la app (con la app abierta funciona porque ahí el permiso normal sí
+    // alcanza).
+    private fun tienePermisoUbicacionFondo(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return true
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
+    }
+
     private fun tienePermisoNotificaciones(): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
         return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
@@ -186,15 +211,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun actualizarEstadoPermisos() {
         val faltaUbicacion = !tienePermisoUbicacion()
+        // El botón de "todo el tiempo" no tiene sentido mostrarlo todavía
+        // si ni siquiera se dio el permiso de ubicación normal — Android
+        // lo ignora o ni lo pregunta bien si se pide antes.
+        val faltaUbicacionFondo = !faltaUbicacion && !tienePermisoUbicacionFondo()
         val faltaNotificaciones = !tienePermisoNotificaciones()
         val faltaExencionBateria = !tieneExencionBateria()
 
         botonPermisoUbicacion.visibility = if (faltaUbicacion) android.view.View.VISIBLE else android.view.View.GONE
+        botonPermisoUbicacionFondo.visibility = if (faltaUbicacionFondo) android.view.View.VISIBLE else android.view.View.GONE
         botonPermisoNotificaciones.visibility = if (faltaNotificaciones) android.view.View.VISIBLE else android.view.View.GONE
         botonPermisoBateria.visibility = if (faltaExencionBateria) android.view.View.VISIBLE else android.view.View.GONE
 
         textoEstado.text = if (faltaUbicacion || faltaNotificaciones) {
             getString(R.string.permiso_ubicacion_necesario)
+        } else if (faltaUbicacionFondo) {
+            getString(R.string.permiso_ubicacion_fondo_necesario)
         } else if (faltaExencionBateria) {
             getString(R.string.permiso_bateria_necesario)
         } else {
@@ -202,9 +234,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         // El seguimiento arranca en cuanto están los permisos de verdad
-        // (ubicación y notificaciones) — la exclusión de batería mejora
-        // que no se corte solo, pero no es indispensable para que
-        // funcione, así que no se lo bloquea si todavía no se dio.
+        // (ubicación y notificaciones) — el de ubicación "todo el tiempo"
+        // y la exclusión de batería mejoran la confiabilidad, pero no son
+        // indispensables para arrancar, así que no se lo bloquea si
+        // todavía no se dieron.
         if (!faltaUbicacion && !faltaNotificaciones) {
             registrarTokenFcmSiCorresponde()
             iniciarSeguimiento()

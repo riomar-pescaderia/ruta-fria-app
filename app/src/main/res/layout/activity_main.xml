@@ -119,6 +119,15 @@
                 android:visibility="gone" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/botonPermisoUbicacionFondo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@color/orange"
+                android:text="@string/permiso_ubicacion_fondo_boton"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/botonPermisoNotificaciones"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

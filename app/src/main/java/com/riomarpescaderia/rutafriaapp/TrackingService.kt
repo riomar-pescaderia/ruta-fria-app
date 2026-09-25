@@ -23,10 +23,13 @@ import kotlin.concurrent.thread
 // cada tantos minutos (configurable desde Ruta Fría, ver
 // Prefs.intervaloMin) si está dentro del horario configurado
 // (/vendedores/ubicacion/horario): si lo está, manda la posición; si no,
-// no hace nada hasta el próximo control. No usa alarmas del sistema ni
-// permisos extra — mientras el servicio esté vivo y en primer plano,
-// Android lo sigue tratando como "en uso" para el GPS, igual que
-// LocationService.
+// no hace nada hasta el próximo control. Arranca siempre desde un
+// contexto exento de las restricciones de Android para crear servicios
+// en segundo plano (la Activity en primer plano, o el arranque del
+// celular) — por eso, a diferencia de LocationService, no depende del
+// permiso de ubicación "todo el tiempo" para poder arrancar: una vez
+// creado, mientras el servicio esté vivo y en primer plano, Android lo
+// sigue tratando como "en uso" para el GPS en cada ciclo posterior.
 class TrackingService : Service() {
 
     companion object {
@@ -44,7 +47,20 @@ class TrackingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         crearCanalSiHaceFalta()
-        startForeground(NOTIF_ID, construirNotificacion(enHorario = true))
+        try {
+            // Mismo punto sensible que en LocationService.kt: si esto se
+            // llegara a disparar sin el permiso de ubicación "todo el
+            // tiempo" con la app en segundo plano (no debería pasar acá,
+            // porque este servicio arranca desde MainActivity en primer
+            // plano o desde el arranque del celular — ambos casos
+            // exentos — pero por las dudas), mejor frenar en silencio que
+            // tumbar la app entera.
+            startForeground(NOTIF_ID, construirNotificacion(enHorario = true))
+        } catch (e: Exception) {
+            corriendo = false
+            stopSelf()
+            return START_NOT_STICKY
+        }
 
         if (corriendo) {
             // Ya había un ciclo en marcha (por ejemplo, la Activity llamó

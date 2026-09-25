@@ -12,6 +12,8 @@
     <string name="boton_cerrar_sesion">Cerrar sesión</string>
     <string name="permiso_ubicacion_necesario">Para poder mandar tu ubicación cuando te la pidan, la app necesita permiso de ubicación.</string>
     <string name="permiso_ubicacion_boton">Dar permiso de ubicación</string>
+    <string name="permiso_ubicacion_fondo_necesario">Falta un paso más: dar permiso de ubicación "todo el tiempo", para que funcione cuando te piden la ubicación con la app minimizada.</string>
+    <string name="permiso_ubicacion_fondo_boton">Permitir ubicación todo el tiempo</string>
     <string name="permiso_notificaciones_boton">Dar permiso de notificaciones</string>
     <string name="permiso_bateria_necesario">Un último paso: para que el seguimiento no se corte solo, hay que excluir la app de la optimización de batería del celular.</string>
     <string name="permiso_bateria_boton">Excluir de la optimización de batería</string>
