@@ -11,6 +11,12 @@
     <!-- Para que TrackingService pueda volver a prenderse solo después de
          que se reinicia el celular (ver BootReceiver.kt). -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Para poder pedirle al celular que excluya la app de la
+         optimización de batería (ver pedirExencionBateria en
+         MainActivity.kt) — sin esto, el fabricante (Xiaomi, Samsung,
+         Huawei, etc.) puede terminar matando el seguimiento en segundo
+         plano igual, aunque sea un servicio en primer plano. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
         android:allowBackup="false"

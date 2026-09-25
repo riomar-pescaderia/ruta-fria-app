@@ -13,6 +13,9 @@
     <string name="permiso_ubicacion_necesario">Para poder mandar tu ubicación cuando te la pidan, la app necesita permiso de ubicación.</string>
     <string name="permiso_ubicacion_boton">Dar permiso de ubicación</string>
     <string name="permiso_notificaciones_boton">Dar permiso de notificaciones</string>
+    <string name="permiso_bateria_necesario">Un último paso: para que el seguimiento no se corte solo, hay que excluir la app de la optimización de batería del celular.</string>
+    <string name="permiso_bateria_boton">Excluir de la optimización de batería</string>
+    <string name="permiso_bateria_error">No se pudo abrir la configuración de batería automáticamente. Buscala a mano en Ajustes del celular → Batería → Ruta Fría → Sin restricciones.</string>
     <string name="notif_canal_ubicacion">Envío de ubicación</string>
     <string name="notif_titulo_enviando">Enviando tu ubicación a Ruta Fría…</string>
     <string name="notif_texto_enviando">Esto se pidió desde el sistema — se cierra solo en unos segundos.</string>

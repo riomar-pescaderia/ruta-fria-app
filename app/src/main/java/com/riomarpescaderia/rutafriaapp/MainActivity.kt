@@ -1,10 +1,14 @@
 package com.riomarpescaderia.rutafriaapp
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -31,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textoEstado: TextView
     private lateinit var botonPermisoUbicacion: Button
     private lateinit var botonPermisoNotificaciones: Button
+    private lateinit var botonPermisoBateria: Button
     private lateinit var botonCerrarSesion: Button
 
     private val pedirUbicacion = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -54,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         textoEstado = findViewById(R.id.textoEstado)
         botonPermisoUbicacion = findViewById(R.id.botonPermisoUbicacion)
         botonPermisoNotificaciones = findViewById(R.id.botonPermisoNotificaciones)
+        botonPermisoBateria = findViewById(R.id.botonPermisoBateria)
         botonCerrarSesion = findViewById(R.id.botonCerrarSesion)
 
         botonIngresar.setOnClickListener { intentarLogin() }
@@ -65,6 +71,7 @@ class MainActivity : AppCompatActivity() {
                 pedirNotificaciones.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+        botonPermisoBateria.setOnClickListener { pedirExencionBateria() }
         botonCerrarSesion.setOnClickListener {
             detenerSeguimiento()
             Prefs.cerrarSesion(this)
@@ -147,19 +154,57 @@ class MainActivity : AppCompatActivity() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
     }
 
+    // No es un permiso en el sentido estricto (no hace falta pedirlo para
+    // que la app funcione) — es la exclusión de la lista de optimización
+    // de batería del celular. Sin ella, el fabricante puede terminar
+    // matando el seguimiento en segundo plano igual, aunque el servicio
+    // esté en primer plano con su notificación — por eso se pide aparte,
+    // como un paso más, pero sin bloquear el resto de la app si no se da.
+    private fun tieneExencionBateria(): Boolean {
+        val gestor = getSystemService(Context.POWER_SERVICE) as PowerManager
+        return gestor.isIgnoringBatteryOptimizations(packageName)
+    }
+
+    private fun pedirExencionBateria() {
+        try {
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = Uri.parse("package:$packageName")
+            }
+            startActivity(intent)
+        } catch (e: Exception) {
+            // Algunos fabricantes no implementan bien esta pantalla
+            // directa del sistema — si falla, se lleva a la lista
+            // general de optimización de batería para que el usuario
+            // busque la app a mano ahí.
+            try {
+                startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+            } catch (e2: Exception) {
+                Toast.makeText(this, getString(R.string.permiso_bateria_error), Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     private fun actualizarEstadoPermisos() {
         val faltaUbicacion = !tienePermisoUbicacion()
         val faltaNotificaciones = !tienePermisoNotificaciones()
+        val faltaExencionBateria = !tieneExencionBateria()
 
         botonPermisoUbicacion.visibility = if (faltaUbicacion) android.view.View.VISIBLE else android.view.View.GONE
         botonPermisoNotificaciones.visibility = if (faltaNotificaciones) android.view.View.VISIBLE else android.view.View.GONE
+        botonPermisoBateria.visibility = if (faltaExencionBateria) android.view.View.VISIBLE else android.view.View.GONE
 
         textoEstado.text = if (faltaUbicacion || faltaNotificaciones) {
             getString(R.string.permiso_ubicacion_necesario)
+        } else if (faltaExencionBateria) {
+            getString(R.string.permiso_bateria_necesario)
         } else {
             getString(R.string.sesion_lista)
         }
 
+        // El seguimiento arranca en cuanto están los permisos de verdad
+        // (ubicación y notificaciones) — la exclusión de batería mejora
+        // que no se corte solo, pero no es indispensable para que
+        // funcione, así que no se lo bloquea si todavía no se dio.
         if (!faltaUbicacion && !faltaNotificaciones) {
             registrarTokenFcmSiCorresponde()
             iniciarSeguimiento()
